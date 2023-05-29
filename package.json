@@ -10,8 +10,7 @@
   },
   "type": "module",
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack.config.cjs",
-    "release": "run-s test docs build",
+    "release": "run-s test build",
     "build": "webpack --config webpack.config.cjs --mode production",
     "start_server": "node test/unit-test-server.js",
     "server_wake_up_win": "start cmd.exe /K npm run start_server",
@@ -23,7 +22,8 @@
     "posttest": "run-s server_kill",
     "docs": "run-s jsdoc jsdoc2md",
     "jsdoc": "npx jsdoc src/chat-stream-client.js -d docs -t node_modules/minami",
-    "jsdoc2md": "jsdoc2md src/chat-stream-client.js > api.md"
+    "jsdoc2md": "jsdoc2md src/chat-stream-client.js > api.md",
+    "start_old": "cross-env NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack.config.cjs"
   },
   "author": "Tom Misawa <riversun.org@gmail.com> (https://github.com/riversun)",
   "license": "MIT",
