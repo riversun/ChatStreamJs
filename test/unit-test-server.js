@@ -111,7 +111,7 @@ app.post('/chat_too_many_request', (req, res) => {
  */
 app.post('/chat_server_error', (req, res) => {
     const {user_input, regenerate} = req.body;
-    res.status(500).json({ error: 'too_many_requests' });
+    res.status(500).json({"error": "internal_server_error", "detail": "queueing request"});
 });
 
 // Check if server is running

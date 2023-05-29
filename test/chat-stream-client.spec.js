@@ -92,7 +92,6 @@ describe("ChatStreamClient", () => {
 
         });
 
-        // 一時スキップしたい場合は xit
         it("終了ステータスの検証 StreamStatus.ABORTED:ストリーム受信中にabortできること", (done) => {
 
             const TEST_DEF = 'ストリーム受信中にabortできること';
@@ -196,6 +195,7 @@ describe("ChatStreamClient", () => {
 
 
         });
+
         it("終了ステータスの検証 StreamStatus.REQUEST_ALREADY_STARTED:リクエスト終了には再度再度リクエストできる", (done) => {
 
             const TEST_DEF = '終了ステータスの検証 StreamStatus.REQUEST_ALREADY_STARTED:リクエスト終了には再度再度リクエストできる';
@@ -306,8 +306,39 @@ describe("ChatStreamClient", () => {
                         console.log(`【UT実行中】${TEST_DEF} 【${counter}回目のonResponse】 response_text:${response_text} pos:${pos} status:${status} statusCode:${statusCode} err:${JSON.stringify(err)} `);
 
                         if (pos == "end") {
+                            expect(status).toBe(StreamStatus.CLIENT_ERROR);
                             expect(err.json).toBeTruthy();
                             expect(err.json.error).toBe("too_many_requests");
+
+                            done();
+                        }
+
+                        prev_response_text = response_text;
+                    }
+                });
+
+        });
+
+        it("終了ステータスの検証 StreamStatus.CLIENT_ERROR: サーバーサイドエラーの場合", (done) => {
+
+            const TEST_DEF = '終了ステータスの検証 StreamStatus.CLIENT_ERROR: サーバーサイドエラーの場合';
+            const client = new ChatStreamClient({
+                endpoint: `http://localhost:${port}/chat_server_error`
+            });
+            let counter = 0;
+            let prev_response_text = ``;
+            client.send(// jasmine の場合 await と done は共存できないので、awaitしない
+                {
+                    user_input: 'こんにちは', onResponse: (data) => {
+
+                        const {response_text, pos, status, statusCode, err} = data;
+                        console.log(`【UT実行中】${TEST_DEF} 【${counter}回目のonResponse】 response_text:${response_text} pos:${pos} status:${status} statusCode:${statusCode} err:${JSON.stringify(err)} `);
+
+                        if (pos == "end") {
+                            expect(err.json).toBeTruthy();
+                            expect(status).toBe(StreamStatus.SERVER_ERROR);
+                            expect(err.json.error).toBe("internal_server_error");
+                            expect(err.json.detail).toBeTruthy();
 
                             done();
                         }
