@@ -81,7 +81,7 @@ describe("ChatStreamClient", () => {
                                 final_text = prev_response_text;
                             }
                             expect(counter > 30).toBe(true);
-                            expect(status).toBe('ok');
+                            expect(status).toBe(StreamStatus.OK);
                             expect(final_text).toBe(`吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。`);
                             done();
                         }
