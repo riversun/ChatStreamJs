@@ -9,7 +9,7 @@ ChatStreamJs is a streaming chat client library. It provides client-side utiliti
 You can install this library via npm. Perform the installation using the command below:
 
 ```shell
-npm install chatstream
+npm install chatstreamjs
 ```
 ## Usage
 

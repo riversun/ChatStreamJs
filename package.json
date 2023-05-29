@@ -1,5 +1,5 @@
 {
-  "name": "chatstream",
+  "name": "chatstreamjs",
   "version": "0.1.0",
   "description": "Client Side Library for ChatStream",
   "main": "src/index.js",
