@@ -106,7 +106,7 @@ You can regenerate the chat on the AI assistant side by adding `regenerate:true`
 client.send(
     {
         user_input: null,
-        regenerate: true,// 再生成を促す
+        regenerate: true,
         onResponse: (data) => {
         }
     });
