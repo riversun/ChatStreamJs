@@ -1,6 +1,6 @@
 {
   "name": "chatstreamjs",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Client Side Library for ChatStream",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -26,7 +26,13 @@
     "start_old": "cross-env NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack.config.cjs"
   },
   "author": "Tom Misawa <riversun.org@gmail.com> (https://github.com/riversun)",
-  "license": "MIT",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/riversun/ChatStreamJs.git"
