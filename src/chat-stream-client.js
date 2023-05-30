@@ -80,16 +80,19 @@ export default class ChatStreamClient {
 
         try {
 
-            const instanceLevelFetchOpts = self.opts.fetchOpts;
+            const instanceLevelFetchOpts = self.opts.fetchOpts || {};
             const instanceLevelFetchOptsHeaders = instanceLevelFetchOpts['headers'] || {};
             const methodLevelFetchOpts = opts.fetchOpts || {};
             const methodLevelFetchOptsHeaders = methodLevelFetchOpts['headers'] || {};
 
             // fetchOpts.headers はHTTPヘッダをコンストラクタと #send 双方で追加できるよう、もう一段深いレベルでマージする
-            const finalHeaders = {...instanceLevelFetchOptsHeaders, ...methodLevelFetchOptsHeaders}
+            const finalHeaders = {...instanceLevelFetchOptsHeaders, ...methodLevelFetchOptsHeaders};
+            const finalFetchOpts = {...instanceLevelFetchOpts, ...methodLevelFetchOpts};
 
-            const finalFetchOpts = {...instanceLevelFetchOpts, ...methodLevelFetchOpts}
-            finalFetchOpts['headers'] = finalHeaders;
+            if (Object.keys(finalHeaders).length !== 0) {
+                finalFetchOpts['headers'] = finalHeaders;
+            }
+
 
             const _fetchOpts = {
                 method: 'POST',
