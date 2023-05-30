@@ -32,6 +32,15 @@ app.post('/chat_echo', (req, res) => {
 });
 
 /**
+ * 入力された値のエコーを返す Web API
+ */
+app.post('/chat_echo_headers', (req, res) => {
+    const {user_input, regenerate} = req.body;
+    res.json(req.headers);
+});
+
+
+/**
  * 吾輩は猫である の冒頭をストリーミングで返す
  */
 app.post('/chat_cat', (req, res) => {

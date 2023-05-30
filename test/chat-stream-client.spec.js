@@ -92,6 +92,101 @@ describe("ChatStreamClient", () => {
 
         });
 
+
+        it("ヘッダ(コンストラクタ)を指定できること", (done) => {
+            // ストリーミング受信できていることを確認するため onResponse 呼び出し回数をカウント
+            const TEST_DEF = 'ヘッダ(コンストラクタ)を指定できること';
+            const client = new ChatStreamClient({
+                endpoint: `http://localhost:${port}/chat_echo_headers`,
+                fetchOpts:{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Original-Header': 'original value',
+                    }
+                },
+            });
+            let counter = 0;
+            let prev_response_text = ``;
+            client.send(// jasmine の場合 await と done は共存できないので、awaitしない
+                {
+                    user_input: 'こんにちは', onResponse: (data) => {
+
+                        const {response_text, pos, status, statusCode, err} = data;
+                        console.log(`【UT実行中】${TEST_DEF} 【${counter}回目のonResponse】 response_text:${response_text} pos:${pos} status:${status} statusCode:${statusCode} err:${JSON.stringify(err)} `);
+
+                        if (response_text) {
+                            // 中身をともなう response_text が返ってきているときカウントアップ
+                            counter++;
+                        }
+
+                        if (pos == "end") {
+                            let final_text = response_text;
+                            if (!final_text) {
+                                // pos=="end" のとき response_text は falsy になるため、判定用テキストとして、１ターン前の response_text を使用している
+                                final_text = prev_response_text;
+                            }
+                            const finalObj=JSON.parse(final_text);
+                            expect(finalObj['X-Original-Header'.toLowerCase()]).toBe('original value')
+                            done();
+                        }
+
+                        prev_response_text = response_text;
+                    }
+                });
+
+        });
+
+        it("ヘッダ(#send)を指定できること", (done) => {
+            // ストリーミング受信できていることを確認するため onResponse 呼び出し回数をカウント
+            const TEST_DEF = 'ヘッダ(#send)を指定できること';
+            const client = new ChatStreamClient({
+                endpoint: `http://localhost:${port}/chat_echo_headers`,
+                fetchOpts:{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Original-Header': 'original value',
+                    }
+                },
+            });
+            let counter = 0;
+            let prev_response_text = ``;
+            client.send(// jasmine の場合 await と done は共存できないので、awaitしない
+                {
+                    user_input: 'こんにちは',
+                    fetchOpts:{
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Original-Header-Now': 'original value now',
+                        }
+                    },
+                    onResponse: (data) => {
+
+                        const {response_text, pos, status, statusCode, err} = data;
+                        console.log(`【UT実行中】${TEST_DEF} 【${counter}回目のonResponse】 response_text:${response_text} pos:${pos} status:${status} statusCode:${statusCode} err:${JSON.stringify(err)} `);
+
+                        if (response_text) {
+                            // 中身をともなう response_text が返ってきているときカウントアップ
+                            counter++;
+                        }
+
+                        if (pos == "end") {
+                            let final_text = response_text;
+                            if (!final_text) {
+                                // pos=="end" のとき response_text は falsy になるため、判定用テキストとして、１ターン前の response_text を使用している
+                                final_text = prev_response_text;
+                            }
+                            const finalObj=JSON.parse(final_text);
+                            expect(finalObj['X-Original-Header'.toLowerCase()]).toBe('original value')
+                            expect(finalObj['X-Original-Header-Now'.toLowerCase()]).toBe('original value now')
+                            done();
+                        }
+
+                        prev_response_text = response_text;
+                    }
+                });
+
+        });
+
         it("終了ステータスの検証 StreamStatus.ABORTED:ストリーム受信中にabortできること", (done) => {
 
             const TEST_DEF = 'ストリーム受信中にabortできること';
