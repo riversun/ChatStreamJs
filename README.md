@@ -1,209 +1,159 @@
-# ChatStream Client Library
+# ChatStreamJs
 
-## Overview
+[English](https://github.com/riversun/ChatStreamJs/blob/main/README.md) | [&#26085;&#26412;&#35486;](https://github.com/riversun/ChatStreamJs/blob/main/README_ja.md)
 
-ChatStreamJs is a streaming chat client library. It provides client-side utilities for communicating with a server and sending user input to the server.
 
-## Installation
+ChatStreamJs is a web front-end client for LLM web servers built on [ChatStream](https://pypi.org/project/chatstream/).
 
-You can install this library via npm. Perform the installation using the command below:
+It can handle streaming chats that are generated sequentially by pre-trained large-scale language models and sent as WebStreaming.
 
-```shell
+[![npm version](https://badge.fury.io/js/chatstreamjs.svg)](https://badge.fury.io/js/chatstreamjs)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
+## Install
+
+````
 npm install chatstreamjs
-```
+````
+
 ## Usage
 
-```js
-import {ChatStreamClient} from 'chatstream';
+### Streaming text generation
 
+```js
+import {ChatStreamClient, StreamStatus} from 'chatstreamjs';
+
+// Generate a ChatStream client
 const client = new ChatStreamClient({
-    endpoint: 'http://path-to-api/chat_stream',
-    onResponse: ({response_text, pos, status, statusCode, err}) => {
-        // your response handling code here...
-    }
+    endpoint: `http://localhost:3000/chat_stream`, // The endpoint of the ChatStream server
 });
 
-```
+// Send a request (user's input prompt) to the ChatStream server
+client.send(
+    {
+        user_input: 'Hello',// Input text
+        onResponse: (data) => { // Response from the ChatStream server (called repeatedly for each token generation)
 
-# Methods
+            const {
+                // [response_text] Text responded from the server
+                response_text,
+                // [pos]
+                // The position of the response.
+                // "begin": The first token generation in this sentence generation
+                // "mid": Midway token generation in this sentence generation
+                // "end": The end of this sentence generation (since this is a notice of completion, response_text is null)
+                pos,
+                // [status]
+                // Status during sentence generation
+                // StreamStatus.OK: The streaming request was processed successfully
+                // StreamStatus.ABORTED: The communication was interrupted (by calling the abort method oneself)
+                // StreamStatus.SERVER_ERROR: A 5xx (server error) HTTP status code was returned from the server
+                // StreamStatus.CLIENT_ERROR: A 4xx (client error) HTTP status code was returned from the server
+                // StreamStatus.NETWORK_ERROR: The network was disconnected during communication
+                // StreamStatus.FETCH_ERROR: Other unexpected communication errors
+                // StreamStatus.REQUEST_ALREADY_STARTED: The send method was called again during the streaming request
+                status,
+                // Error details during sentence generation
+                // err.json.error: Error message from the ChatStream server
+                // err.json.detail: Detailed error message from the ChatStream server
+                err,
+                // [statusCode]
+                // HTTP status code
+                // statusCode==429 ... Access to the ChatStream server was concentrated and the request could not be handled. It is set at the same time as StreamStatus.CLIENT_ERROR
+                // statusCode==500 ... An error occurred within the ChatStream server. It is set at the same time as StreamStatus.SERVER_ERROR
+                statusCode,
 
-- constructor(opts = {}): Creates an instance of the client. The opts object can include an endpoint and onResponse method.
+            } = data;
 
-- async send(opts = {}): Sends user input to the server. The response from the server is passed to the onResponse callback function specified in the constructor.
+            if (response_text) {
+                console.log(`ASSISTANT: ${response_text}`);
+            }
 
-- abort(): Aborts the fetch request. Useful if you want to stop the request before it has finished.
-
-# Error Handling
-
-This library provides the following status codes for error handling:
-
-- StreamStatus.REQUEST_ALREADY_STARTED
-- StreamStatus.CLIENT_ERROR
-- StreamStatus.SERVER_ERROR
-- StreamStatus.ABORTED
-- StreamStatus.NETWORK_ERROR
-- StreamStatus.FETCH_ERROR
-
-
-# Unit Test Methods
-
-Unit tests of this library are executed on a browser.
-
-## How to run unit tests Batch execution.
-
-```
-npm test
-```
-
-## How to run unit tests
-
-First, start the unit test server.
-
-```
-npm run server_wake_up
-```
-
-Next, right-click on the test you want to run in webstorm and execute it (karma will start).
-
-## Unit tests are for Windows by default, but can be run on Linux by changing one line
-
-For Windows
-
-
-
-For Linux
-
-Change "pretest" as follows
-
-```
-"pretest": "run-s server_wake_up_linux server_wake_up_polling", ```` Change "pretest" to
-```
-
-
-## If new source code is added.
-
-Add both the test code and the source code to be tested to **[karma.conf.cjs](karma.conf.cjs)**.
-This is the basic
-
-```
-        files: [
-            'src/stream-status.js',.
-            
-            'test/chat-stream-client.spec.js'
-        ], [
-```
-
-## Background
-
-Originally, I was going to use JEST for unit testing,
-
-- AbortController does not exist 
-- It turned out that node-fetch does not support getReader.
-
-The former had polyfill, but node-fetch did not support getReader. The former had polyfill, but it turned out that node-fetch did not support webstreaminig
-The former had polyfill, but it turned out that node-fetch did not support webstreaminig
-
-The following code does not work
-
-```
-const resReader = fetch_response.body.getReader();
-```
-
-This part is the heart of this library,
-JEST, which emulates the DOM on node.js, is not suited for this purpose.
-
-
-# Introduce karma to run tests directly in the browser
-
-Therefore, we introduced karma, which allows us to run unit tests directly in the browser.
-
-The test framework itself uses jasmine.
-
-The dependency for karma is shown below
-
-<table>
-	<tr>
-		<td>"karma":"^6.4.2",</td>
-		<td>Browser-based unit testing framework karma itself</td>.
-	</tr>
-	<tr>
-		<td>"karma-babel-preprocessor": "^8.0.2",</td>
-		<td>Preprocessor for karma to convert source code written in ES6 and UT to ES5</td>.
-	</tr>
-	<tr>
-		<td>"karma-sourcemap-loader":"^0.4.0",</td>
-		<td>Source code written in ES6, preprocessor to allow source map even when UT is ES5, but not working well</td>.
-	</tr>
-	<tr>
-		<td>"karma-jasmine":"^5.1.0",</td>
-		<td>Used to run the testing framework jasmine on karma</td>.
-	</tr>
-	<tr>
-		<td>"jasmine":"^5.0.0",</td>
-		<td>Testing Framework jasmine</td>
-	</tr>
-	<tr>
-		<td>"karma-chrome-launcher":"^3.2.0"</td>
-		<td>Plugin for handling chrome browser in karma</td>.
-	</tr>
-	<tr>
-		<td>"puppeteer":"^20.4.0"</td>
-		<td>Use to run Chrome headless</td>.
-	</tr>
-</table>
-
-
-# babel.config.cjs
-
-babel.config.cjs is a library for browsers in this case, so do the following
-
-**babel.config.cjs**
-
-```js
-module.exports = {
-    presets: [
-        ['@babel/preset-env', {targets: "defaults"}], ['@babel/preset-env', {targets: "defaults"}
-    ],.
-    plugins: [
-        '@babel/plugin-transform-modules-umd',.
-        'babel-plugin-transform-import-meta',.
-    ],.
-    sourceMaps: "inline"
-};
-```
-
-The following part may not be necessary.
-
-```js
- plugins: [
-        '@babel/plugin-transform-modules-umd', [
-        'babel-plugin-transform-import-meta', [
-    ],.
-```
-
-`@babel/plugin-transform-modules-umd` is for umd that works in the browser as well when the presets target was node.js in the first place, so.
-
-# karma.conf.cjs to configure karma execution settings
-
-Karma's execution configuration is written in **karma.conf.cjs**.
-
-```cjs
-process.env.CHROME_BIN = require('puppeteer').executablePath()
-
-module.exports = function (config) {
-    config.set({
-        
-        files: [
-            
-            
-            'test/chat-stream-client.spec.js'
-        ],, [ 'test/chat-stream-client.spec.js'
-        preprocessors: {
-            'src/**/*.js': ['babel', 'sourcemap'], {
-            'test/**/*.js': ['babel', 'sourcemap']
-        },.
-
-        sourceMapLoader: {
-            useSourceRoot: '/sources'
+            if (pos == "end") {
+                // Sentence generation by this turn's request has finished
+                // However, since it may not have ended normally, handle the status
+            }
         }
+    });
+
+```
+
+The return value of `#send` is a Promise,
+but it is not recommended to use `await` when calling.
+Because the response from the chatstream server is called back via `onResponse`,
+there is little point in awaiting.
+
+Also, if `await` is used, subsequent processing may be blocked by `await`
+when `abort` is called after the request.
+
+### Aborting generation during sentence generation
+
+The `abort` method can be used to explicitly disconnect
+from the current communication and stop streaming text generation.
+
+```js
+client.abort();
+```
+
+Although this method appears to force the client to stop generating sentences by disconnecting from the communication, it is a very legitimate operation because the ChatStream server handles client disconnections properly.
+
+### Regenerating sentences
+
+You can regenerate the chat on the AI assistant side by adding `regenerate:true` to the parameter of the `send` method.
+
+```js
+client.send(
+    {
+        user_input: null,
+        regenerate: true,// 再生成を促す
+        onResponse: (data) => {
+        }
+    });
+```
+
+In UI implementations, it is common to use `abort` to break communication,
+and then use `regenerate:true` to generate sentences again.
+
+# Specifying fetch options
+
+Since `fetch` is used internally for communication with ChatStream servers, you can specify the `fetch` option in **fetchOpts** as is.
+
+## fetch options in constructor
+
+```js
+const client = new ChatStreamClient({
+        endpoint: `http://localhost:3000/chat_stream`,
+        fetchOpts: {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Original-Header': 'original value',
+            }
+        },
+    }
+);
+```
+
+## fetch options in send method
+
+It is also possible to change the headers for each request,
+for example, by specifying them in each send method.
+
+In this case, headers are added to those specified in the constructor.
+
+```js
+client.send(
+    {
+        user_input: null,
+        fetchOpts:{
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Original-Header-Now': 'original value now',
+            }
+        },
+        onResponse: (data) => {
+        }
+    });
 ```
