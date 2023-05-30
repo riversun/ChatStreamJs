@@ -80,6 +80,17 @@ export default class ChatStreamClient {
 
         try {
 
+            const instanceLevelFetchOpts = self.opts.fetchOpts;
+            const instanceLevelFetchOptsHeaders = instanceLevelFetchOpts['headers'] || {};
+            const methodLevelFetchOpts = opts.fetchOpts || {};
+            const methodLevelFetchOptsHeaders = methodLevelFetchOpts['headers'] || {};
+
+            // fetchOpts.headers はHTTPヘッダをコンストラクタと #send 双方で追加できるよう、もう一段深いレベルでマージする
+            const finalHeaders = {...instanceLevelFetchOptsHeaders, ...methodLevelFetchOptsHeaders}
+
+            const finalFetchOpts = {...instanceLevelFetchOpts, ...methodLevelFetchOpts}
+            finalFetchOpts['headers'] = finalHeaders;
+
             const _fetchOpts = {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -88,7 +99,8 @@ export default class ChatStreamClient {
                 },
                 body: JSON.stringify({user_input: user_input, regenerate: regenerate}),
                 signal: this.abortController.signal // Add signal to the Fetch request.
-                , ...self.opts.fetchOpts
+                , ...finalFetchOpts,
+
             }
 
             const _fetch = fetch;
