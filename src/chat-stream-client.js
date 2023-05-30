@@ -1,7 +1,11 @@
 import {StreamStatus} from "./stream-status.js";
 
 /**
- * Class for the streaming chat client
+ * Client for ChatStream(https://pypi.org/project/chatstream/) based LLM web server
+ *
+ * A client for a web front-end that handles chat appropriately,
+ * generated sequentially by a large pre-trained language model and sent as WebStreaming
+ *
  * @export
  * @class ChatStreamClient
  */
@@ -74,7 +78,6 @@ export default class ChatStreamClient {
         }
         self.requestStarted = true;
 
-
         try {
 
             const _fetchOpts = {
@@ -90,8 +93,7 @@ export default class ChatStreamClient {
 
             const _fetch = fetch;
 
-            const fetch_response = await _fetch(self.opts.endpoint, _fetchOpts
-            );
+            const fetch_response = await _fetch(self.opts.endpoint, _fetchOpts);
 
             if (!fetch_response.ok) {
                 // - When an HTTP level error occurs
@@ -212,7 +214,6 @@ export default class ChatStreamClient {
                 console.error(`Error occurred while http error parsing...`, textError);
             }
         }
-
         return {json: null, rawData: responseData};
     }
 }
