@@ -1,6 +1,6 @@
 {
   "name": "chatstreamjs",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Client Side Library for ChatStream",
   "main": "src/index.js",
   "module": "src/index.js",

@@ -123,7 +123,8 @@ export default class ChatStreamClient {
                         pos: 'end',
                         status: StreamStatus.CLIENT_ERROR,
                         statusCode: fetch_response.status,
-                        err: parsedError
+                        err: parsedError,
+                        rawResponse:fetch_response,
                     }
                     console.error(`Client error occurred code:${fetch_response.status}`, parsedError)
                     await fnCallbackOnResponse(out);
@@ -137,7 +138,8 @@ export default class ChatStreamClient {
                         pos: 'end',
                         status: StreamStatus.SERVER_ERROR,
                         statusCode: fetch_response.status,
-                        err: parsedError
+                        err: parsedError,
+                        rawResponse:fetch_response,
                     };
                     console.error(`Server error occurred code:${fetch_response.status}`, parsedError)
                     await fnCallbackOnResponse(out);
@@ -166,7 +168,7 @@ export default class ChatStreamClient {
                         pos = 'end';
                     }
 
-                    const out = {response_text, pos, status: StreamStatus.OK}
+                    const out = {response_text, pos, status: StreamStatus.OK,rawResponse:fetch_response,}
 
                     const {
                         need_to_stop
@@ -182,17 +184,17 @@ export default class ChatStreamClient {
         } catch (e) {
             if (e.name === 'AbortError') {
                 // Error that occurs when the fetch process is explicitly interrupted
-                const out = {response_text: null, pos: 'end', status: StreamStatus.ABORTED}
+                const out = {response_text: null, pos: 'end', status: StreamStatus.ABORTED,rawResponse:null,}
                 await fnCallbackOnResponse(out);
             } else if (e.name === 'TypeError') {
                 // - Error that occurs when disconnected from the server or when the network is disconnected during the process
-                const out = {response_text: null, pos: 'end', status: StreamStatus.NETWORK_ERROR, err: e}
+                const out = {response_text: null, pos: 'end', status: StreamStatus.NETWORK_ERROR, err: e,rawResponse:null}
                 console.error(`Network error occurred while fetching...`, e);
                 await fnCallbackOnResponse(out);
             } else {
 
                 // - When any other error occurs
-                const out = {response_text: null, pos: 'end', status: StreamStatus.FETCH_ERROR, err: e}
+                const out = {response_text: null, pos: 'end', status: StreamStatus.FETCH_ERROR, err: e,rawResponse:null}
                 console.error(`Unknown error occurred while fetching...`, e);
                 await fnCallbackOnResponse(out);
             }
